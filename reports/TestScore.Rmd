@@ -1,0 +1,134 @@
+---
+title: "TestScoreDemo"
+author: "Brian Holt"
+date: "January 12, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+# Test Score theory and examples
+
+
+Trying to create an introductory understanding about test score theory without a heavy amount of stats, but with visualizations.
+
+
+##Intro
+Begin with collecting some data from class.  We had only 17 last night.  That's a small sample, But that starts the process.
+
+To begin, lets generate 17 heights, with an assumption that they are normally, or evenly, around a mean of 67 inches (5'7) with a Standard deviation of 15 inches.  Standard  deviations are similar to an average distance from the mean.  
+
+
+```{r}
+height<-rnorm(17,67,15)
+height
+```
+
+
+So, the basic idea of test score theory is that the measurement of a construct (in our case, height) will be a component of two things:  The ontologically true, in the absolute pure sense of the word, height of the person plus some broad issue generally called error.  It looks like this:
+
+Measured score = True Score + error
+
+The true score is ironically the easier concept to understand because most seem to be comfortable with thinking about height as being absolutely valid.  It's the error part that is hard.  
+
+So, what goes into error?  
+
+Well, Measurement matters, and with the case of height, is usually the source of the trouble.  If you use a string, a yard stick, a tape measure, or a set of highly tuned calipers, you will get slightly different measurements.  
+
+In other words, if I were to measure the same person with each of the different measurement tools, I might soemthing that looks like the following:
+
+
+``` {r }
+person1<-data.frame(rbind(c(65,65.1,65.4,65.09)))
+colnames(person1)<-c('string','tape measure','yardstick','caliper')
+```
+
+```{r echo = FALSE}
+person1
+```
+
+These are 4 different measurements for a single person. Why the variation?  Well, because there are 4 different measrument tools. 
+
+But conceptually, keep in mind that even with the exacting calipers 
+
+
+```{r, out.width = "250px", echo=F, fig.align='right'}
+knitr::include_graphics("https://image.shutterstock.com/z/stock-photo-stadiometer-human-height-measuring-devices-close-up-concept-photo-of-medical-lifestyle-height-208331287.jpg")
+```
+
+
+you will find very slight measurement differences.  So, let's say we used these calipers, a very reliable tool, and made 10 measurements of that same person, we might see 10 measurements that look like this:
+
+```{r,echo=F}
+person1.1<-round(rnorm(10,65.09,.05),2)
+person1.1
+```
+
+Notice what happens when you take the mean of this list:  `r mean(person1.1)`
+
+You'll notice the person is about 1/10 of an incher taller than 5 feet and 5 inches.  
+
+
+
+The take away so far is that when trying to find the true score of somethng, it will often be marred by measurement error (or other sources of error as well).
+
+
+when discussing error, it's useful to think of it as a type of variation.  That measurements will vary around an average score, and so maybe the average score is a good estimate of the "true" score. 
+
+So, if we wanted to visualize the variation of these amazing calipers, we could take many many sample measurements of this person.  Theoretically, we would have to use calculus to fully understand the meaning of this, but what if we took infinite measurements?  If not infinite, what if we took 10,000?  What would the variation of measruement, for this single person measured 10,000 times look like?
+
+```{r, echo =FALSE}
+plot(density(rnorm(1e4,65.1,.05)),yaxt='n',xlab="inches",main="10,000 height measurements of one person")
+abline(v=65.1,col='blue')
+
+abline(v=65.1+.05,col='red')
+abline(v=65.1-.05,col='red')
+
+
+```
+
+
+So What does this say? Well, you can see a sort of distrubtion of measurements, with more common mesurements hanging around the middle. In this case, I've contrived this example so that this variation is about .05 standard deviations. In other words, on average, using this particular caliper on this person to measure height ten thousand times, I expect my measurments to vary, on average .05 inches.  That .05 number is represented by the red lines.
+
+Compare that to a similarly contrived example measuring height with a tape mesaure, where I'm assumign variation not of .05 inches, but of a quater inche (0.25):
+
+```{r, echo =FALSE}
+plot(density(rnorm(1e4,65.1,.25)),yaxt='n',xlab="inches",main="10,000 height measurements of one person")
+abline(v=65.1,col='red')
+```
+
+It's hard to see compare them above, so let me put them next to each other here. 
+
+```{r, echo =FALSE, out.width = '40%', fig.align = "left"}
+TapeMeasure<-data.frame(cbind(1e4,rnorm(1e4,65.1,.25)))
+caliper<-rnorm(1e4,65.1,.05)
+df<-data.frame(TapeMeasure,caliper)
+df<-df[,2:3]
+colnames(df)<-c('tape','caliper')
+tidy_df<-df %>% gather(key = measure,value = height)
+p<-ggplot(tidy_df,aes(x=height))
+p+geom_density()+geom_vline(xintercept=65.1,col='blue')+facet_grid(measure~.)
+
+```
+Notice the difference the variation, or spread of scores.  This is saying that when using a tape meausure, the actual measured score will bounce around a lot more than if using a precise caliper.  
+
+(by the way, you may be wondering why one graph is so much taller than the other.  This has to do with how calculus and probablity theory work together.  The area under these curves, as a rule of probablity, must sum to one.  In other words, if you were to fill the area under these cures with thousands of tiny little boxes, the area of those boxes would sum to 1.0.  This is true for both of these particular graphs.  Given that the caliper spread is so narrow, more of its' area has to collect above the mean score marked by that center blue line)
+
+
+So, remember the forumlua Meausred score = True score + error?  Which of these measurement tools has greater error?  
+
+
+If this all makes sense, you can use this metaphorically to think about meauring ANY concept, abstract like personality or concrete like height.  
+
+
+Shifting to personality, and specifically the Big 5:
+
+
+
+
+
